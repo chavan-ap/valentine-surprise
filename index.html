@@ -288,15 +288,7 @@
             position: absolute;
         }
         
-        .attempt-counter {
-            margin-top: 25px;
-            color: var(--text-dark);
-            font-size: 1rem;
-            opacity: 0.8;
-            font-weight: 600;
-            position: relative;
-            z-index: 1;
-        }
+
         
         /* Celebration Screen - FIXED SCROLLING */
         .celebration {
@@ -514,8 +506,6 @@
                     No 😢
                 </button>
             </div>
-            
-            <div class="attempt-counter" id="attemptCounter"></div>
         </div>
     </div>
     
@@ -551,11 +541,6 @@
     </div>
     
     <script>
-        // ═══════════════════════════════════════════════════════════════
-        // CONFIGURATION
-        // ═══════════════════════════════════════════════════════════════
-        const MAX_ATTEMPTS = 8;
-        
         // ═══════════════════════════════════════════════════════════════
         // FLOATING HEARTS, ROSES, AND SPARKLES
         // ═══════════════════════════════════════════════════════════════
@@ -608,32 +593,32 @@
         // ═══════════════════════════════════════════════════════════════
         // MOVING "NO" BUTTON LOGIC
         // ═══════════════════════════════════════════════════════════════
-        let attempts = 0;
         const yesBtn = document.getElementById('yesBtn');
         const noBtn = document.getElementById('noBtn');
-        const attemptCounter = document.getElementById('attemptCounter');
         const buttonContainer = document.getElementById('buttonContainer');
         
         function moveNoButton() {
-            attempts++;
+            // Get the white question box boundaries
+            const questionBox = document.querySelector('.question-box');
+            const boxRect = questionBox.getBoundingClientRect();
             
-            const btnWidth = noBtn.offsetWidth || 180; // Fallback width
-            const btnHeight = noBtn.offsetHeight || 60; // Fallback height
+            const btnWidth = noBtn.offsetWidth || 180;
+            const btnHeight = noBtn.offsetHeight || 60;
             
-            // Much larger padding for safety - keeps button well within screen
-            const padding = 50;
-            const minX = padding;
-            const minY = padding;
-            const maxX = window.innerWidth - btnWidth - padding;
-            const maxY = window.innerHeight - btnHeight - padding;
+            // Keep button inside the white box with padding
+            const padding = 30;
+            const minX = boxRect.left + padding;
+            const minY = boxRect.top + padding;
+            const maxX = boxRect.right - btnWidth - padding;
+            const maxY = boxRect.bottom - btnHeight - padding;
             
-            // Ensure maxX and maxY are valid
+            // Ensure valid boundaries
             if (maxX < minX || maxY < minY) {
-                console.warn('Screen too small for button movement');
-                return; // Don't move if screen is too small
+                console.warn('Box too small for button movement');
+                return;
             }
             
-            // Generate random position within safe boundaries
+            // Generate random position within the white box
             let randomX = minX + Math.random() * (maxX - minX);
             let randomY = minY + Math.random() * (maxY - minY);
             
@@ -641,33 +626,11 @@
             randomX = Math.max(minX, Math.min(maxX, randomX));
             randomY = Math.max(minY, Math.min(maxY, randomY));
             
+            // Apply position
             noBtn.style.position = 'fixed';
             noBtn.style.left = randomX + 'px';
             noBtn.style.top = randomY + 'px';
             noBtn.style.zIndex = '1000';
-            
-            const messages = [
-                'Nice try! 😏',
-                'Almost got me! 😉',
-                'Nope! Try again! 😄',
-                'So close! 💕',
-                'One more time? 🤭',
-                'Getting tired? 😅',
-                'Just say yes! 🥺',
-                'Please? 🌹'
-            ];
-            
-            if (attempts < MAX_ATTEMPTS) {
-                attemptCounter.textContent = `${messages[attempts - 1]} (Attempt ${attempts}/${MAX_ATTEMPTS})`;
-            } else {
-                attemptCounter.textContent = `Okay, okay... I think you know what to do now 💖`;
-                noBtn.textContent = 'Fine... 😒';
-            }
-            
-            if (attempts >= MAX_ATTEMPTS) {
-                yesBtn.style.transform = 'scale(1.3)';
-                yesBtn.style.animation = 'pulse-glow 1s infinite';
-            }
         }
         
         noBtn.addEventListener('mouseenter', moveNoButton);
